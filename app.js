@@ -1,4 +1,4 @@
-// Load environment variables first so all modules can access them
+// Load environment variables
 const dotenv = require("dotenv");
 dotenv.config();
 

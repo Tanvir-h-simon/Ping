@@ -5,9 +5,15 @@
 />
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@29.0.5/dist/js/intlTelInput.min.js"></script>
 <style>
-  /* Make the phone widget span the full width like the other inputs */
+  /* Phone widget spans full width like the other inputs */
   .iti {
     width: 100%;
+  }
+  /* Country code shown next to the flag: match the number input (white, same size) */
+  #add-user-modal .iti__selected-country,
+  #add-user-modal .iti__selected-dial-code {
+    color: #fff;
+    font-size: 1.4rem;
   }
 </style>
 
@@ -48,23 +54,18 @@
   const modal = document.querySelector("#add-user-modal");
   const form = document.querySelector("#add-user-form");
 
-  // Initialise the country-code dropdown on the mobile field
+  // Country-code dropdown on the mobile field.
+  // separateDialCode shows the +code next to the flag; user types only the local number.
   const phoneInputField = form.querySelector('input[name="mobile"]');
   const iti = window.intlTelInput(phoneInputField, {
     initialCountry: "bd",
+    separateDialCode: true,
     loadUtils: () =>
       import(
         "https://cdn.jsdelivr.net/npm/intl-tel-input@29.0.5/dist/js/utils.js"
       ),
   });
 
-  const sucessToast = Toastify({
-    text: "User added successfully!",
-    duration: 3000,
-    gravity: "top",
-    position: "right",
-    backgroundColor: "#4CAF50",
-  });
 
   function closeModal() {
     modal.style.display = "none";
@@ -108,39 +109,50 @@
     }
   }
 
-  form.addEventListener("submit", (e) => {
+  // Build the full international number (E.164), e.g. +8801712345678.
+  function getFullNumber() {
+    const fromLib = iti.getNumber();
+    if (fromLib) return fromLib;
+    // Fallback if the formatter has not loaded yet: read the dial code from the DOM.
+    const dialEl = document.querySelector(
+      "#add-user-modal .iti__selected-dial-code"
+    );
+    const dial = dialEl ? dialEl.textContent.replace(/\D/g, "") : "";
+    const local = phoneInputField.value.replace(/\D/g, "");
+    return dial || local ? "+" + dial + local : "";
+  }
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     clearErrors();
 
-    // Replace the typed number with the full international format (E.164),
-    // e.g. +8801712345678, so the backend always receives the country code.
-    const fullNumber =
-      iti.getNumber() ||
-      "+" +
-        iti.getSelectedCountryData().dialCode +
-        phoneInputField.value.replace(/\D/g, "");
-    phoneInputField.value = fullNumber;
+    phoneInputField.value = getFullNumber();
 
-    const formData = new FormData(form);
-
-    fetch("/users", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.success) {
-          sucessToast.show();
-          closeModal();
-          location.reload();
-        } else {
-          displayErrors(data.errors);
-        }
-      })
-      .catch(() => {
-        const generalEl = form.querySelector(".general-error");
-        generalEl.textContent = "Something went wrong. Please try again.";
-        generalEl.classList.add("show");
+    try {
+      const response = await fetch("/users", {
+        method: "POST",
+        body: new FormData(form),
       });
+      const data = await response.json();
+      if (data.success) {
+        Toastify({
+          text: "User added successfully!",
+          duration: 3000,
+          gravity: "top",
+          position: "right",
+          style: { background: "#4CAF50" },
+        }).showToast();
+        closeModal();
+        setTimeout(() => location.reload(), 1500);
+      } else {
+        displayErrors(data.errors);
+      }
+    } catch (err) {
+      // Logs the real reason (network drop, server restart, bad JSON) to the console.
+      console.error("User create failed:", err);
+      const generalEl = form.querySelector(".general-error");
+      generalEl.textContent = "Something went wrong. Please try again.";
+      generalEl.classList.add("show");
+    }
   });
 </script>

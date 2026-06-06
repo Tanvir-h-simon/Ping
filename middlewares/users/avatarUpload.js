@@ -11,7 +11,9 @@ function avatarUpload(req, res, next) {
 
   upload.single("avatar")(req, res, (err) => {
     if (err) {
-      const isClientError = err instanceof multer.MulterError || err.message === "Only .jpg, .jpeg, and .png formats are allowed.";
+      const isClientError =
+        err instanceof multer.MulterError ||
+        err.message === "Only .jpg, .jpeg, and .png formats are allowed.";
       res.status(isClientError ? 400 : 500).json({
         errors: {
           avatar: {
