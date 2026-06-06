@@ -18,7 +18,7 @@
         </div>
       </div>
       <div id="new-message-container">
-        <a href="#">+</a>
+        <a href="#" onclick="openInboxModal()">+</a>
       </div>
       <div id="chat-title">
         <span>Sumit</span>
@@ -45,9 +45,9 @@
       </div>
     </div>
 
-    <div class="modal-wrapper">
+    <div class="modal-wrapper" id="new-conversation-modal">
       <div class="modal">
-        <a href="#" class="modal-close">+</a>
+        <a href="#" onclick="closeInboxModal()" class="modal-close">+</a>
         <div class="modal-title">
           <h2>Create New Conversation</h2>
         </div>
@@ -60,5 +60,14 @@
         </div>
       </div>
     </div>
+    <script>
+      const inboxModal = document.querySelector("#new-conversation-modal");
+      function openInboxModal() {
+        inboxModal.style.display = "block";
+      }
+      function closeInboxModal() {
+        inboxModal.style.display = "none";
+      }
+    </script>
   </body>
 </html>

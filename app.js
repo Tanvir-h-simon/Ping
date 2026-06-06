@@ -1,6 +1,9 @@
+// Load environment variables first so all modules can access them
+const dotenv = require("dotenv");
+dotenv.config();
+
 // External dependencies
 const express = require("express");
-const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const path = require("path");
 const cookieParser = require("cookie-parser");
@@ -16,15 +19,9 @@ const {
 // Create Express app
 const app = express();
 
-// Load environment variables
-dotenv.config();
-
 // Database connection
 mongoose
-  .connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("Connected to MongoDB");
   })

@@ -1,0 +1,114 @@
+<div class="modal-wrapper" id="add-user-modal">
+  <div class="modal">
+    <a href="#" onclick="closeModal()" class="modal-close">+</a>
+    <div class="modal-title">
+      <h2>Create New User</h2>
+    </div>
+    <div class="modal-body">
+      <form
+        id="add-user-form"
+        method="post"
+        action="/users"
+        enctype="multipart/form-data"
+      >
+        <input type="text" placeholder="Enter name" name="name" />
+        <p class="error name-error"></p>
+        <input type="text" placeholder="Enter age" name="age" />
+        <p class="error age-error"></p>
+        <input type="text" placeholder="Enter email" name="email" />
+        <p class="error email-error"></p>
+        <input type="text" placeholder="Enter mobile" name="mobile" />
+        <p class="error mobile-error"></p>
+        <input type="password" placeholder="Enter password" name="password" />
+        <p class="error password-error"></p>
+        <input type="file" name="avatar" />
+        <p class="error avatar-error"></p>
+
+        <p class="error general-error"></p>
+
+        <input type="submit" value="Submit" />
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+  const modal = document.querySelector("#add-user-modal");
+  const form = document.querySelector("#add-user-form");
+
+  const sucessToast = Toastify({
+    text: "User added successfully!",
+    duration: 3000,
+    gravity: "top",
+    position: "right",
+    backgroundColor: "#4CAF50",
+  });
+
+  function closeModal() {
+    modal.style.display = "none";
+  }
+
+  function openModal() {
+    modal.style.display = "block";
+  }
+
+  function clearErrors() {
+    form.querySelectorAll("p.error").forEach((el) => {
+      el.textContent = "";
+      el.classList.remove("show");
+    });
+    form.querySelectorAll("input").forEach((el) => el.classList.remove("error"));
+  }
+
+  function setFieldError(fieldName, msg) {
+    const errorEl = form.querySelector(`.${fieldName}-error`);
+    const inputEl = form.querySelector(`[name="${fieldName}"]`);
+    if (errorEl) {
+      errorEl.textContent = msg || "";
+      errorEl.classList.toggle("show", !!msg);
+    }
+    if (inputEl) {
+      inputEl.classList.toggle("error", !!msg);
+    }
+  }
+
+  function displayErrors(errors) {
+    setFieldError("name", errors?.name?.msg);
+    setFieldError("age", errors?.age?.msg);
+    setFieldError("email", errors?.email?.msg);
+    setFieldError("mobile", errors?.mobile?.msg);
+    setFieldError("password", errors?.password?.msg);
+    setFieldError("avatar", errors?.avatar?.msg);
+    const generalEl = form.querySelector(".general-error");
+    if (errors?.general?.msg) {
+      generalEl.textContent = errors.general.msg;
+      generalEl.classList.add("show");
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    clearErrors();
+
+    const formData = new FormData(form);
+
+    fetch("/users", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          sucessToast.show();
+          closeModal();
+          location.reload();
+        } else {
+          displayErrors(data.errors);
+        }
+      })
+      .catch(() => {
+        const generalEl = form.querySelector(".general-error");
+        generalEl.textContent = "Something went wrong. Please try again.";
+        generalEl.classList.add("show");
+      });
+  });
+</script>
