@@ -24,7 +24,7 @@ front-end framework, which keeps the app small and fast.
 - Online presence, typing indicators, read receipts, and unread counts
 - Image and file attachments
 - Edit and delete your own messages, with live updates for everyone in the chat
-- Group management: create, rename, add or remove members, set a group photo, leave or delete
+- Group management: create, rename, add or remove members, leave or delete
 - Admin user management, plus self-service profile editing and password change
 - Message history with cursor-based pagination for fast loading
 
