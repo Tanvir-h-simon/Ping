@@ -80,7 +80,7 @@ front-end framework, which keeps the app small and fast.
 - Node.js 18 or newer
 - A MongoDB database, either a local server or a free MongoDB Atlas cluster
 
-### Setup
+### Setup (Local)
 
 1. Install the dependencies:
 
